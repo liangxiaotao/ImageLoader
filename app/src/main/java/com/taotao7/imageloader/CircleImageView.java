@@ -10,12 +10,13 @@ import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.widget.ImageView;
 
 /**
  * 一个简洁和高效的圆形图片
  */
 
-public class CircleImageView extends android.support.v7.widget.AppCompatImageView{
+public class CircleImageView extends ImageView {
 
     //用户设置的图片
     private Bitmap mBitmap;
