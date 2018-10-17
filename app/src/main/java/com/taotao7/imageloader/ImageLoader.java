@@ -16,16 +16,15 @@ import java.util.concurrent.Executors;
 public class ImageLoader {
     //获取CPU的数量
     private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
-    //图片缓存
-    private LruCache<String, Bitmap> mImageCache;
     //线程池，线程数量为CPU数量加1
     private ExecutorService mExecutor = Executors.newFixedThreadPool(CPU_COUNT + 1);
     private Bitmap mBitmap;
+    private ImageCache mImageCache;
 
     private static ImageLoader mImageLoader;
 
     private ImageLoader() {
-        initCache();
+        mImageCache = new ImageCache();
     }
 
     public static ImageLoader newInstance(){
@@ -39,19 +38,6 @@ public class ImageLoader {
         return mImageLoader;
     }
 
-    /**
-     * 初始化缓存
-     */
-    private void initCache() {
-        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-        final int cacheSize = maxMemory / 8;
-        mImageCache = new LruCache<String, Bitmap>(cacheSize) {
-            @Override
-            protected int sizeOf(String key, Bitmap value) {
-                return value.getRowBytes() * value.getHeight() / 1024;
-            }
-        };
-    }
 
     /**
      * 图片加载
@@ -100,7 +86,16 @@ public class ImageLoader {
         try {
             URL url = new URL(imageUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            bitmap = BitmapFactory.decodeStream(connection.getInputStream());
+            //设置网络连接超时时间为3秒
+            connection.setConnectTimeout(3000);
+            //设置请求方法
+            connection.setRequestMethod("GET");
+            //打开输入流
+            connection.setDoInput(true);
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK){
+                bitmap = BitmapFactory.decodeStream(connection.getInputStream());
+            }
             connection.disconnect();
         } catch (Exception e) {
             e.printStackTrace();
