@@ -3,13 +3,10 @@ package com.taotao7.imageloader;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
-import android.util.LruCache;
 import android.widget.ImageView;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.time.chrono.MinguoChronology;
-import java.util.IllegalFormatCodePointException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -24,7 +21,6 @@ public class ImageLoader {
     private static ImageLoader mImageLoader;
 
     private ImageLoader() {
-        mImageCache = new ImageCache();
     }
 
     public static ImageLoader newInstance(){
@@ -55,6 +51,9 @@ public class ImageLoader {
             return;
         }
         imageView.setTag(url);
+        if (mImageCache == null){
+            mImageCache = new MemoryCache();
+        }
         mBitmap = mImageCache.get(url);
         if (mBitmap != null) {
             imageView.setImageBitmap(mBitmap);
@@ -101,5 +100,9 @@ public class ImageLoader {
             e.printStackTrace();
         }
         return bitmap;
+    }
+
+    public void setImageCache(ImageCache mImageCache){
+        this.mImageCache = mImageCache;
     }
 }
